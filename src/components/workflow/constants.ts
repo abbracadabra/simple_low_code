@@ -32,5 +32,5 @@ export const SUPPORT_OUTPUT_VARS_NODE = [
   BlockEnum.Start, BlockEnum.LLM, BlockEnum.Code, BlockEnum.Tool, BlockEnum.VariableAggregator, BlockEnum.Iteration,
 ]
 
-export const ChatSysVars:SimpleVarSchema[] = [{name:'sys.query',type: VarType.string},{name:'sys.user_id',type: VarType.string},{name:'sys.app_id',type: VarType.string}]
-export const SysVars:SimpleVarSchema[] = [{name:'sys.app_id',type: VarType.string}]
+export const ChatSysVars:SimpleVarSchema[] = [{name:'query',type: VarType.string},{name:'user_id',type: VarType.string},{name:'app_id',type: VarType.string}]
+export const SysVars:SimpleVarSchema[] = [{name:'app_id',type: VarType.string}]

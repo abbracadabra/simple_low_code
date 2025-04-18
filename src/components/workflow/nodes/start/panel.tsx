@@ -108,6 +108,7 @@ const Panel: FC<NodeProps<StartNodeType>> = ({
       <Divider />
     </>
     }
+    系统变量
     <Table columns={sysCol} dataSource={sysDatasource} />
   </>
 }

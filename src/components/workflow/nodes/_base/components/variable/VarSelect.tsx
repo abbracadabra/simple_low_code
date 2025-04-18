@@ -20,7 +20,7 @@ type VarSelectProps = {
 
 const VarSelect = ({ onChange, type, nodeId, value: val, ...props }: VarSelectProps) => {
 
-    const [value, setValue] = useMergedState(val)
+    const [value, setValue] = useMergedState<ValueSelector>(val)
 
     const handleOnChange = (v: ValueSelector) => {
         setValue(v)
@@ -52,7 +52,7 @@ const VarSelect = ({ onChange, type, nodeId, value: val, ...props }: VarSelectPr
         })
     }, [nodeVars, type])
 
-    return <Select options={opts} onChange={(v) => { handleOnChange(v?.split(".")) }} value={(value as ValueSelector)?.join(".")} {...props}/>
+    return <Select options={opts} onChange={(v) => { handleOnChange(v?.split(".")) }} value={value?.length ? value?.join(".") : undefined} {...props}/>
 }
 
 export default VarSelect

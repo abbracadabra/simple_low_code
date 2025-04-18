@@ -8,6 +8,7 @@ import type { NodeProps } from '@/components/workflow/types'
 // import { useTranslation } from 'react-i18next'
 // import NodeGroupItem from './components/node-group-item'
 import { VariableAggregateNodeType } from './types'
+import { useNodeTitle } from '../../hooks'
 // import type { VariableAssignerNodeType } from './types'
 
 // const i18nPrefix = 'workflow.nodes.variableAssigner'
@@ -15,6 +16,7 @@ import { VariableAggregateNodeType } from './types'
 const Node: FC<NodeProps<VariableAggregateNodeType>> = ({
   data,
 }) => {
+  const { getNodeTitle } = useNodeTitle()
   // const { t } = useTranslation()
   const ref = useRef<HTMLDivElement>(null)
   const { groups } = data
@@ -52,7 +54,7 @@ const Node: FC<NodeProps<VariableAggregateNodeType>> = ({
             <div key={i}>
               <div><span>{item.name}</span>&nbsp;<span>{item.output_type}</span></div>
               {item.variables.map((v,vi)=>{
-                return <div key={vi}>{v.join('.')}</div>
+                return <div key={vi}>{getNodeTitle(v[0]) + '/' + v.slice(1).join('.')}</div>
               })}
             </div>
           )

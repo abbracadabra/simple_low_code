@@ -1,9 +1,10 @@
-import { BlockEnum } from '../types'
-import { useMemo } from 'react'
+import { BlockEnum, CommonNodeData } from '../types'
+import { useCallback, useMemo } from 'react'
 import { useIsChatMode } from './use-workflow'
 import {
     NODES_EXTRA_INFO,
   } from '../nodes/constants'
+import { useStoreApi } from 'reactflow'
 
 // export const useValidNodesMap = () => {
 //   const isChatMode = useIsChatMode()
@@ -34,4 +35,32 @@ export const useValidBlocks = (nodeType?: BlockEnum, isInIteration: boolean = fa
     }
   }, [nodeType, isInIteration])
 }
-  
+
+export const useNodeTitle = () => {
+  const store = useStoreApi()
+  const {
+    getNodes,
+  } = store.getState()
+
+  const getNodeTitle = useCallback((nodeId: string)=>{
+    if (!nodeId) {
+      return 'unknown'
+    }
+    if (nodeId === 'sys') {
+      return '系统'
+    }
+    if (nodeId === 'env') {
+      return '环境'
+    }
+    if (nodeId === 'conv') {
+      return '会话'
+    }
+    const nd = getNodes().find(node => node.id === nodeId)
+    if (!nd) {
+      return 'unknown'
+    }
+    return (nd.data as CommonNodeData).title
+  },[getNodes])
+
+  return { getNodeTitle }
+}

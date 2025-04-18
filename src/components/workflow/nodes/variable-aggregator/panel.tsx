@@ -1,5 +1,5 @@
 import type { FC } from 'react'
-import React from 'react'
+import React, { useCallback } from 'react'
 import { NodeProps } from 'reactflow'
 import { VariableAggregateNodeType } from './types'
 import { Button, Card, Col, Divider, Flex, Input, Row, Tag } from 'antd'
@@ -16,7 +16,7 @@ const Panel: FC<NodeProps<VariableAggregateNodeType>> = ({
 }) => {
   const { handleNodeDataUpdateWithSyncDraft } = useNodeDataUpdate()
 
-  const handleAddGroup = () => {
+  const handleAddGroup = useCallback(() => {
     const newData = produce(data, draft => {
       draft.groups.push({
         name: undefined,
@@ -25,24 +25,28 @@ const Panel: FC<NodeProps<VariableAggregateNodeType>> = ({
       })
     })
     handleNodeDataUpdateWithSyncDraft({ id, data: newData })
-  }
+  },[data,handleNodeDataUpdateWithSyncDraft])
 
-  const handleGroupDel = (idx: number) => {
+  const handleGroupDel = useCallback((idx: number) => {
     const newData = produce(data, draft => {
       draft.groups.splice(idx, 1)
     })
     handleNodeDataUpdateWithSyncDraft({ id, data: newData })
-  }
+  },[data,handleNodeDataUpdateWithSyncDraft])
 
-  const handleVarDel = (gidx: number, vidx: number) => {
+  const handleVarDel = useCallback((gid: number, vidx: number) => {
     const newData = produce(data, draft => {
-      draft.groups[gidx].variables.splice(vidx, 1)
+      draft.groups[gid].variables.splice(vidx, 1)
     })
     handleNodeDataUpdateWithSyncDraft({ id, data: newData })
-  }
+  },[data,handleNodeDataUpdateWithSyncDraft])
 
-  // const handleAddVar = (gidx: number) => {
-  // }
+  const handleAddVar = useCallback((gid: number) => {
+    const newData = produce(data, draft => {
+      draft.groups[gid].variables.push([])
+    })
+    handleNodeDataUpdateWithSyncDraft({ id, data: newData })
+  },[data,handleNodeDataUpdateWithSyncDraft])
 
   return (
     <div className='mt-2'>
@@ -56,7 +60,7 @@ const Panel: FC<NodeProps<VariableAggregateNodeType>> = ({
               </Flex>
               {item.variables.map((v, vi) => <Row key={vi}>
                 {/* 第二个，type是第一个的type */}
-                <Col span={22}><VarSelect disabled nodeId={id} value={v} /></Col>
+                <Col span={22}><VarSelect disabled nodeId={id} value={v} onChange={ ()=>handleSelectType } type={item.output_type}/></Col>
                 <Col span={2}><DeleteOutlined onClick={() => handleVarDel(index, vi)} /></Col>
               </Row>)}
               {index !== data.groups.length - 1 && <Divider />}

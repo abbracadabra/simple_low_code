@@ -10,16 +10,16 @@ import {
 } from '@/components/workflow/types';
 // import { NodeFuncMap } from '../../..';
 
-export const isSystemVar = (valueSelector: ValueSelector) => {
-  return valueSelector[0] === 'sys';
-};
+// export const isSystemVar = (valueSelector: ValueSelector) => {
+//   return valueSelector[0] === 'sys';
+// };
 
-export const isENV = (valueSelector: ValueSelector) => {
-  return valueSelector[0] === 'env';
-};
+// export const isENV = (valueSelector: ValueSelector) => {
+//   return valueSelector[0] === 'env';
+// };
 
 export const isConversationVar = (valueSelector: ValueSelector) => {
-  return valueSelector[0] === 'conversation';
+  return valueSelector[0] === 'conv';
 };
 
 /**

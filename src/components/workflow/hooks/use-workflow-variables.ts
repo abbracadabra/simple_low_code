@@ -1,11 +1,11 @@
 import modelStore from '@/components/base/system-config-store';
 import { WorkflowDraftStoreContext } from '@/components/workflow/context';
-import {
-  // mapToOutputVars,
-  isSystemVar,
-} from '@/components/workflow/nodes/node-base/components/variable/utils';
+// import {
+//   isSystemVar,
+// } from '@/components/workflow/nodes/node-base/components/variable/utils';
 import {
   BlockEnum,
+  CommonNodeData,
   NodeOutputVar,
   VarType,
   VarWithConstVal,
@@ -18,10 +18,11 @@ import { useCallback, useContext, useMemo } from 'react';
 import { useStore } from 'zustand';
 import { useIsChatMode, useNodeInfo, useWorkflow } from '.';
 // import { NodeFuncMap } from '../nodes/index';
-import { ChatSysVars, SysVars } from '../constants';
+// import { ChatSysVars, SysVars } from '../constants';
 import { NODES_EXTRA_INFO } from '../nodes/constants';
 import { IterationNodeType } from '../nodes/iteration/types';
 import { useStoreApi } from 'reactflow';
+import { ChatSysVars, SysVars } from '../constants';
 
 /**
  * startId: 万一selector是sys.xxx，因为sys.xxx在开始节点
@@ -44,10 +45,10 @@ const findVarBySelector = ({
     return undefined;
   }
   let nid: string | undefined = selector[0];
-  const isSys = isSystemVar(selector);
-  if (isSys) {
-    nid = startId;
-  }
+  // const isSys = isSystemVar(selector);
+  // if (isSys) {
+  //   nid = startId;
+  // }
   return nodeOutputs
     .find((v) => v.nodeId === nid)
     ?.vars?.find((v) => {
@@ -74,13 +75,6 @@ const mapToOutputVars = ({
   // 节点的输出变量
   nodes?.forEach((node) => {
     let vars: NodeOutputVar['vars'] = [];
-    if (node.data.type === BlockEnum.Start) {
-      if (isChatMode) {
-        vars.push(...ChatSysVars);
-      } else {
-        vars.push(...SysVars);
-      }
-    }
     const getOutputVars = NODES_EXTRA_INFO[node.data.type]?.getOutputVars;
     // const dataProcessor = NodeFuncMap[node.data.type];
     vars = [...vars, ...(getOutputVars?.(node.data) || [])];
@@ -90,6 +84,21 @@ const mapToOutputVars = ({
       vars,
     });
   });
+
+  if (isChatMode) {
+    res.push({
+      nodeId: 'sys',
+      title: '系统',
+      vars: [...ChatSysVars],
+    })
+  } else {
+    res.push({
+      nodeId: 'sys',
+      title: '系统',
+      vars: [...SysVars],
+    })
+  }
+
   //环境变量
   if (environmentVariables.length) {
     res.push({
@@ -246,24 +255,5 @@ export const useBeforeNodeVars = (props: { nodeId: string }) => {
     return getNodeVars({ nodes: beforeNodes, parentNode });
   }, [getNodeVars, beforeNodes, nodeId]);
 };
-
-
-export const getVarddd = () => {
-  const store = useStoreApi()
-  const {
-    getNodes,
-  } = store.getState()
-
-  useCallback((nodeId: string)=>{
-    if (nodeId === 'sys') {
-      return '系统'
-    }
-    if (nodeId === 'sys') {
-      return '系统'
-    }
-  },[getNodes])
-  
-}
-
 
 // todo node 渲染，如何在引用变量变化后 刷新下

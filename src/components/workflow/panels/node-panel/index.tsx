@@ -12,6 +12,7 @@ import IfElsePanel from '@/components/workflow/nodes/if-else/panel'
 import CodePanel from '@/components/workflow/nodes/code/panel'
 import ToolPanel from '@/components/workflow/nodes/tool/panel'
 import VariableAggregatorPanel from '@/components/workflow/nodes/variable-aggregator/panel'
+import AssignerPanel from '@/components/workflow/nodes/assigner/panel'
 
 export const PanelComponentMap: Record<string, ComponentType<any>> = {
     [BlockEnum.Start]: StartPanel,
@@ -22,6 +23,8 @@ export const PanelComponentMap: Record<string, ComponentType<any>> = {
     [BlockEnum.Code]: CodePanel,
     [BlockEnum.Tool]: ToolPanel,
     [BlockEnum.VariableAggregator]: VariableAggregatorPanel,
+    [BlockEnum.Assigner]: AssignerPanel,
+
 }
 
 

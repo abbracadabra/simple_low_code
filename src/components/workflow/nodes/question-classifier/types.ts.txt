@@ -1,0 +1,14 @@
+import type { CommonNodeType } from '@/components/workflow/types'
+
+  export type QuestionClassifierNodeType = CommonNodeType & {
+    query_variable_selector: ValueSelector
+    model: ModelConfig
+    classes: string[]
+    instruction: string
+    memory?: Memory
+    vision: {
+      enabled: boolean
+      configs?: VisionSetting
+    }
+  }
+  

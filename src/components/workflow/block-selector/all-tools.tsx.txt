@@ -1,0 +1,44 @@
+import {
+  useMemo,
+} from 'react'
+import type {
+  OnSelectBlock,
+} from '../types'
+// import Tools from './tools'
+import { useStore } from '../context'
+// import type { Tool } from '@/components/tools/types'
+
+type AllToolsProps = {
+  searchText: string
+  onSelect: OnSelectBlock
+}
+
+const AllTools = ({
+  searchText,
+  onSelect,
+}: AllToolsProps) => {
+
+  const allTools = useStore(s => s.allTools)
+  // const workflowTools = useStore(s => s.workflowTools)
+  const isMatchingKeywords = (text: string, keywords: string) => {
+    return text.toLowerCase().includes(keywords.toLowerCase())
+  }
+
+  const matchTools = useMemo(() => {
+    // const mergedTools: Tool[] = [...customTools, ...workflowTools]
+    // const mergedTools: Tool[] = [...customTools]
+
+    return allTools.filter((tool) => {
+      return isMatchingKeywords(tool.label, searchText)
+    })
+  // }, [customTools, workflowTools, searchText])
+  }, [allTools, searchText])
+
+  return <Tools
+    // showWorkflowEmpty={activeTab === ToolTypeEnum.Workflow}
+    tools={matchTools}
+    onSelect={onSelect}
+  />
+}
+
+export default AllTools

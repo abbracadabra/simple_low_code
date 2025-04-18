@@ -1,0 +1,62 @@
+import type { NodeProps } from 'reactflow'
+import {
+    memo,
+} from 'react'
+import type { ComponentType } from 'react'
+import BaseNode from './_base/node'
+import { BlockEnum, Var } from '../types'
+import StartNode from './start/node'
+import EndNode from './end/node'
+import IterationNode from './iteration/node'
+import AssignerNode from './assigner/node'
+import AnswerNode from './answer/node'
+import CodeNode from './code/node'
+import IfElseNode from './if-else/node'
+import LLMNode from './llm/node'
+import ToolNode from './tool/node'
+import VariableAssignerNode from './variable-aggregator/node'
+
+// reactflow 'custom' node type, sub component by data.type
+// type=custom节点的渲染，iter-start不在这里它是其他type
+const NodeComponentMap: Record<string, ComponentType<any>> = {
+    [BlockEnum.Start]: StartNode,
+    [BlockEnum.End]: EndNode,
+    [BlockEnum.Answer]: AnswerNode,
+    [BlockEnum.LLM]: LLMNode,
+    // [BlockEnum.KnowledgeRetrieval]: KnowledgeRetrievalNode,
+    // [BlockEnum.QuestionClassifier]: QuestionClassifierNode,
+    [BlockEnum.IfElse]: IfElseNode,
+    [BlockEnum.Code]: CodeNode,
+    // [BlockEnum.TemplateTransform]: TemplateTransformNode,
+    // [BlockEnum.HttpRequest]: HttpNode,
+    [BlockEnum.Tool]: ToolNode,
+    // [BlockEnum.VariableAssigner]: VariableAssignerNode,
+    [BlockEnum.Assigner]: AssignerNode,
+    [BlockEnum.VariableAggregator]: VariableAssignerNode,
+    // [BlockEnum.ParameterExtractor]: ParameterExtractorNode,
+    [BlockEnum.Iteration]: IterationNode,
+    // [BlockEnum.DocExtractor]: DocExtractorNode,
+    // [BlockEnum.ListFilter]: ListFilterNode,
+}
+
+
+// reactflow 'custom' node type
+// BaseNode里有handle 
+const CommonNode = (props: NodeProps) => {
+    const nodeData = props.data
+    const NodeComponent = NodeComponentMap[nodeData.type]
+
+    return (
+        <>
+            {/* handle、icon and common */}
+            <BaseNode {...props}>
+                {/* node specific */}
+                <NodeComponent />
+            </BaseNode>
+        </>
+    )
+}
+CommonNode.displayName = 'CommonNode'
+
+export default memo(CommonNode)
+

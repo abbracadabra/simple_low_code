@@ -1,0 +1,86 @@
+// value: val prop: varType， only write， only select
+
+import { useBeforeNodeVars } from '@/components/workflow/hooks';
+import { ValueSelector, VarType } from '@/components/workflow/types'
+import { Input, InputNumber, Select, Switch } from 'antd'
+import { useMemo, useState } from 'react';
+import { useMergedState } from 'rc-util';
+
+type VarInputProps = {
+  nodeId: string
+  type: VarType
+  selectOnly: boolean
+  manualOnly: boolean
+
+  value: string | number | ValueSelector
+  onChange?: (val: any) => void
+}
+
+const VarInput = ({nodeId,value,onChange,type,selectOnly,manualOnly}: VarInputProps) => {
+
+    const [manualSwitch, setManualSwitch] = useState(false) // switch切换手写/输入  true手输 false引用
+    
+    const [val, setVal] = useMergedState(value)
+
+    const onSwitch = (isManual: boolean) => {
+        setManualSwitch(isManual)
+        setVal(undefined)
+        onChange?.(undefined)
+    }
+
+    // isManual 展示input控件还是select控件
+    // showSwitch 是否展示switch
+    const [isManual, showSwitch] = useMemo(() => {
+        if (!type) {
+            return [false, false]
+        }
+        if (selectOnly) {
+            return [false, false]
+        }
+        if (manualOnly) {
+            return [true, false]
+        }
+        if (Array.isArray(val)) {
+            return [false, true]
+        }
+        return [manualSwitch, true]
+    }, [selectOnly,manualOnly,val,manualSwitch])
+
+    const nodeVars = useBeforeNodeVars({nodeId})
+    const opts = useMemo(() => {
+        let nvs = nodeVars
+        if (type) {
+            nvs = nodeVars
+            .map(item => ({
+                ...item,
+                vars: item.vars.filter(v => v.type === type)
+            }))
+            .filter(item => item.vars.length > 0)
+        }
+        return nvs.map(item => {
+            return {
+                label: <span>{item.title}</span>,
+                title: item.title,
+                options: item.vars.map(v => ({
+                    label: <span>{v.name}</span>,
+                    value: item.nodeId+'.'+v.name
+                }))
+            }
+        })
+    }, [nodeVars, type])
+
+    let comp:React.ReactNode
+    if (isManual) {
+        if (type === VarType.number) {
+            comp = <InputNumber value={val} onChange={onChange}/>
+        } else {
+            comp = <Input value={val} onChange={onChange}/>
+        }
+    } else {
+        comp = <Select options={opts} onChange={(v)=>{ onChange?.(v?.split(".")) }} value={(val as ValueSelector)?.join(".")}/>
+    }
+
+    return <>{comp}{showSwitch && <Switch checkedChildren="手输" unCheckedChildren="引用" checked={isManual} onChange={onSwitch} />}</>
+}
+
+export default VarInput

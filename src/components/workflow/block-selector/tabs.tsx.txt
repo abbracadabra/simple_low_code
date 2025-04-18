@@ -1,0 +1,50 @@
+import type { FC } from 'react'
+import { memo } from 'react'
+import type { BlockEnum } from '../types'
+// import type { ToolDefaultValue } from './types'
+import type { TabsProps as AntTabProps } from 'antd'
+import { Tabs as AntTabs } from 'antd'
+import NodeSelectList from './node-select-list'
+// import AllTools from './all-tools'
+import ToolSelectList from './tool-select-list'
+import { ToolNodeType } from '../nodes/tool/types'
+
+export type TabsProps = {
+    // activeTab: TabsEnum
+    // onActiveTabChange: (activeTab: TabsEnum) => void
+    searchText: string
+    onSelect: (type: BlockEnum, toolData?: Pick<ToolNodeType,'tool_name'>) => void // type:节点类型，选工具时，type=tool
+    availableBlocksTypes?: BlockEnum[]
+    noBlocks?: boolean
+}
+
+const Tabs: FC<TabsProps> = ({
+    searchText,
+    onSelect,
+    availableBlocksTypes,
+    noBlocks,
+}) => {
+    const items: AntTabProps['items'] = []
+    if (!noBlocks) {
+        items.push({
+            key: '1',
+            label: '节点',
+            children: <NodeSelectList
+                searchText={searchText}
+                onSelect={onSelect}
+                availableBlocksTypes={availableBlocksTypes} // 允许选的节点
+            />,
+        })
+    }
+    items.push({
+        key: '2',
+        label: '工具',
+        children: <ToolSelectList
+            searchText={searchText}
+            onSelect={onSelect}
+        />,
+    })
+    return <AntTabs items={items} />
+}
+
+export default memo(Tabs)

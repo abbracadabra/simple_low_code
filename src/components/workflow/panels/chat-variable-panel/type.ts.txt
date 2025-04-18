@@ -1,0 +1,13 @@
+export enum ConstVarType {
+  string = 'string',
+  number = 'number',
+  boolean = 'boolean',
+  object = 'object',
+  arrayString = 'array[string]',
+  arrayNumber = 'array[number]',
+  arrayBoolean = 'array[boolean]',
+  arrayObject = 'array[object]',
+}
+
+
+

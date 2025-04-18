@@ -1,0 +1,72 @@
+import type { FC } from 'react'
+import React from 'react'
+import { NodeProps } from 'reactflow'
+import { VariableAggregateNodeType } from './types'
+import { Button, Card, Col, Divider, Flex, Input, Row, Tag } from 'antd'
+import { DeleteOutlined, FolderOutlined, PlusOutlined } from '@ant-design/icons'
+import VarSelect from '../_base/components/variable/VarSelect'
+import produce from 'immer'
+import { useNodeDataUpdate } from '../../hooks'
+import { VarType } from '../../types'
+// import { VarType } from '../../types'
+
+const Panel: FC<NodeProps<VariableAggregateNodeType>> = ({
+  id,
+  data,
+}) => {
+  const { handleNodeDataUpdateWithSyncDraft } = useNodeDataUpdate()
+
+  const handleAddGroup = () => {
+    const newData = produce(data, draft => {
+      draft.groups.push({
+        name: undefined,
+        output_type: VarType.string,
+        variables: []
+      })
+    })
+    handleNodeDataUpdateWithSyncDraft({ id, data: newData })
+  }
+
+  const handleGroupDel = (idx: number) => {
+    const newData = produce(data, draft => {
+      draft.groups.splice(idx, 1)
+    })
+    handleNodeDataUpdateWithSyncDraft({ id, data: newData })
+  }
+
+  const handleVarDel = (gidx: number, vidx: number) => {
+    const newData = produce(data, draft => {
+      draft.groups[gidx].variables.splice(vidx, 1)
+    })
+    handleNodeDataUpdateWithSyncDraft({ id, data: newData })
+  }
+
+  // const handleAddVar = (gidx: number) => {
+  // }
+
+  return (
+    <div className='mt-2'>
+      <div className='px-4 pb-4 space-y-4'>
+        <div className='space-y-2'>
+          {data.groups.map((item, index) => (
+            <Card key={index}>
+              <Flex style={{ width: '100%' }} justify='space-between' align='center'>
+                <div><FolderOutlined /><Input /><DeleteOutlined onClick={() => handleGroupDel(index)} /></div>
+                <div><PlusOutlined onClick={()=>handleAddVar(index)} /></div>
+              </Flex>
+              {item.variables.map((v, vi) => <Row key={vi}>
+                {/* 第二个，type是第一个的type */}
+                <Col span={22}><VarSelect disabled nodeId={id} value={v} /></Col>
+                <Col span={2}><DeleteOutlined onClick={() => handleVarDel(index, vi)} /></Col>
+              </Row>)}
+              {index !== data.groups.length - 1 && <Divider />}
+            </Card>
+          ))}
+        </div>
+        <Button><PlusOutlined onClick={handleAddGroup} />添加分组</Button>
+      </div>
+    </div>
+  )
+}
+
+export default React.memo(Panel)

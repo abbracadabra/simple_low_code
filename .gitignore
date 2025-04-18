@@ -1,0 +1,9 @@
+/node_modules
+/.next
+/.husky
+/.eslintrc.js
+/.lintstagedrc
+/.npmrc
+/.prettierrc
+/.prettierignore
+/.stylelintrc

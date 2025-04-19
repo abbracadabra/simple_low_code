@@ -2,13 +2,13 @@
 
 import { ValueSelector, VarType } from '@/components/workflow/types'
 import { Switch } from 'antd'
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 // import { useMergedState } from 'rc-util';
 import VarInput from './VarInput'
 import VarSelect from './VarSelect'
 import Editor from '../prompt/editor';
 import { useMergedState } from 'rc-util';
-import { useBeforeNodeVars } from '@/components/workflow/hooks';
+import { useWorkflowVariables } from '@/components/workflow/hooks';
 
 type VarSelectInputProps = {
     nodeId: string
@@ -25,7 +25,12 @@ const VarSelectInput = ({ nodeId, value: val, onChange, type, mix }: VarSelectIn
 
     const [isManual, setIsManual] = useState(!(value === undefined || value === null || Array.isArray(value))) // switch切换手写/输入  true手输 false引用
 
-    const nodeVars = useBeforeNodeVars({ nodeId })
+    const {getBeforeNodeVars} = useWorkflowVariables()
+
+    const nodeVars = useMemo(()=>{
+        return getBeforeNodeVars(nodeId)
+    },[getBeforeNodeVars,nodeId])
+    // const nodeVars = useBeforeNodeVars({ nodeId })
 
     const onSwitch = (isManual: boolean) => {
         setIsManual(isManual)

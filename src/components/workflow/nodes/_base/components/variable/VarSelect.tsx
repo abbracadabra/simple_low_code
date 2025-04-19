@@ -1,9 +1,9 @@
 
 // value: selector
 
-import { useBeforeNodeVars } from "@/components/workflow/hooks"
+import { useWorkflowVariables } from "@/components/workflow/hooks"
 import { NodeOutputVar, SimpleVarSchema, ValueSelector, VarType } from "@/components/workflow/types"
-import { Select } from "antd"
+import { Select, Tag } from "antd"
 import { useMemo } from "react"
 import { useMergedState } from 'rc-util';
 
@@ -20,20 +20,23 @@ type VarSelectProps = {
 }
 
 
-const VarSelect = ({ onChange, type, nodeId, value: val, varFilter, ...props }: VarSelectProps) => {
+const VarSelect = ({ nodeId, type, value: val, onChange, varFilter, ...props }: VarSelectProps) => {
 
     const [value, setValue] = useMergedState<ValueSelector>(val)
+
+    const {getBeforeNodeVars} = useWorkflowVariables()
 
     const handleOnChange = (v: ValueSelector) => {
         setValue(v)
         onChange?.(v)
     }
 
-    const nodeVars = useBeforeNodeVars({ nodeId })
+    const nodeVars = useMemo(()=>{return getBeforeNodeVars(nodeId)},[getBeforeNodeVars,nodeId])
+    // const nodeVars = useBeforeNodeVars({ nodeId })
     const opts = useMemo(() => {
         let nvs = nodeVars
         if (type || varFilter) {
-            nvs = nvs.map(item=> {
+            nvs = nvs.map(item => {
                 return {
                     ...item,
                     vars: item.vars.filter(v => type ? v.type === type : true).filter(v => varFilter ? varFilter(v, item) : true)
@@ -46,7 +49,7 @@ const VarSelect = ({ onChange, type, nodeId, value: val, varFilter, ...props }: 
                 label: <span>{item.title}</span>,
                 title: item.title,
                 options: item.vars.map(v => ({
-                    label: <span>{item.title + '/' + v.name}</span>,
+                    label: <><Tag>{item.title + '/' + v.name}</Tag><Tag>{v.type}</Tag></>,
                     value: item.nodeId + '.' + v.name
                 }))
             }

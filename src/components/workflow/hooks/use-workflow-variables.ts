@@ -16,7 +16,7 @@ import {
 } from '@/components/workflow/types';
 import { useCallback, useContext, useMemo } from 'react';
 import { useStore } from 'zustand';
-import { useIsChatMode, useNodeInfo, useWorkflow } from '.';
+import { useGetNode, useIsChatMode, useNodeInfo, useWorkflow } from '.';
 // import { NodeFuncMap } from '../nodes/index';
 // import { ChatSysVars, SysVars } from '../constants';
 import { NODES_EXTRA_INFO } from '../nodes/constants';
@@ -133,6 +133,11 @@ export const useWorkflowVariables = () => {
   const conversationVariables = useStore(store, (s) => s.conversationVariables);
   const isChatMode = useIsChatMode();
   const allTools = modelStore((s) => s.allTools); // 触发使用者组件刷新，因为tool的getOutputVars依赖allTools
+  const { getBeforeNodesInSameBranch,getIterationNodeChildren } = useWorkflow();
+  const getNode = useGetNode()
+  // const {
+  //   getNodes,
+  // } = useStoreApi().getState()
 
   /**
    * 比较灵活的方法，自己决定哪些节点是可选的
@@ -142,8 +147,6 @@ export const useWorkflowVariables = () => {
     ({
       nodes,
       parentNode,
-      // hideEnv,
-      // hideChat,
     }: {
       parentNode?: Node | null;
       nodes?: Node[];
@@ -246,25 +249,45 @@ export const useWorkflowVariables = () => {
     },
     [conversationVariables, environmentVariables, isChatMode, allTools],
   );
-  return { getNodeVars };
-};
 
-export const useBeforeNodeVars = (props: { nodeId: string }) => {
-  const { nodeId } = props;
-  const { getNodeVars } = useWorkflowVariables();
-  const { getBeforeNodesInSameBranch } = useWorkflow();
-  const beforeNodes: Node[] = useMemo(() => {
-    return getBeforeNodesInSameBranch(nodeId);
-  }, [nodeId, getBeforeNodesInSameBranch]);
-
-  const nd: Node = useNodeInfo(nodeId);
-  const parentNode = useNodeInfo(nd?.parentId);
-
-  return useMemo(() => {
+  const getBeforeNodeVars = useCallback((nodeId: string) => {
+    const beforeNodes: Node[] = getBeforeNodesInSameBranch(nodeId);
+    const nd: Node = getNode(nodeId)
+    const parentNode = getNode(nd?.parentId);
     return getNodeVars({ nodes: beforeNodes, parentNode });
-  }, [getNodeVars, beforeNodes, nodeId]);
+  },[getBeforeNodesInSameBranch, getNode, getNodeVars])
+  
+  const getChildNodeVars = useCallback((nodeId: string) => {
+    const childNodes:Node[]  = getIterationNodeChildren(nodeId)
+    getNodeVars({ nodes: childNodes });
+  },[getIterationNodeChildren, getNodeVars])
+
+  return { getNodeVars, getBeforeNodeVars, getChildNodeVars };
 };
 
+// export const useBeforeNodeVars = (props: { nodeId: string }) => {
+//   const { nodeId } = props;
+//   const { getNodeVars } = useWorkflowVariables();
+//   const { getBeforeNodesInSameBranch } = useWorkflow();
+//   const beforeNodes: Node[] = useMemo(() => {
+//     return getBeforeNodesInSameBranch(nodeId);
+//   }, [nodeId, getBeforeNodesInSameBranch]);
+
+//   const nd: Node = useNodeInfo(nodeId);
+//   const parentNode = useNodeInfo(nd?.parentId);
+
+//   return useMemo(() => {
+//     return getNodeVars({ nodes: beforeNodes, parentNode });
+//   }, [getNodeVars, beforeNodes, nodeId]);
+// };
+
+// export const useChildNodeVars = ({nodeId}: { nodeId: string }) => {
+//   const { getNodeVars } = useWorkflowVariables();
+//   const {getIterationNodeChildren} = useWorkflow()
+//   const nds:Node[]  = getIterationNodeChildren(nodeId)
+
+//   getNodeVars({ nodes: nds });
+// };
 
 // todo node 渲染，如何在引用变量变化后 刷新下
 

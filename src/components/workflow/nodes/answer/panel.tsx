@@ -2,7 +2,7 @@ import type { FC } from 'react'
 import React, { useCallback, useMemo } from 'react'
 import type { AnswerNodeType } from './types'
 import { NodeProps } from '../../types'
-import { useBeforeNodeVars, useNodeDataUpdate, useNodesReadOnly } from '../../hooks'
+import { useNodeDataUpdate, useNodesReadOnly, useWorkflowVariables } from '../../hooks'
 import Editor from '../_base/components/prompt/editor'
 import produce from 'immer'
 
@@ -10,7 +10,9 @@ const Panel: FC<NodeProps<AnswerNodeType>> = ({
   id,
   data,
 }) => {
-  const nodeVars = useBeforeNodeVars({ nodeId: id })
+  const {getBeforeNodeVars} = useWorkflowVariables()
+  const nodeVars = useMemo(()=> getBeforeNodeVars(id), [getBeforeNodeVars, id])
+  // const nodeVars = useBeforeNodeVars({ nodeId: id })
   const {
     handleNodeDataUpdateWithSyncDraft,
   } = useNodeDataUpdate()

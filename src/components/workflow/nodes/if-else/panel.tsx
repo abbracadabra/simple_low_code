@@ -2,6 +2,7 @@ import type { FC } from 'react'
 import {
   memo,
   useCallback,
+  useMemo,
 } from 'react'
 import { ComparisonOperator, type CaseItem, type IfElseNodeType } from './types'
 import { Button, Col, Row, Select } from 'antd'
@@ -10,7 +11,7 @@ import { NodeProps, VarType } from '../../types'
 import VarSelect from '../_base/components/variable/VarSelect'
 import { ReactSortable } from 'react-sortablejs'
 import produce from 'immer'
-import { useBeforeNodeVars, useEdgesInteractions, useNodeDataUpdate, useNodesReadOnly } from '../../hooks'
+import { useEdgesInteractions, useNodeDataUpdate, useNodesReadOnly, useWorkflow, useWorkflowVariables } from '../../hooks'
 import { useUpdateNodeInternals } from 'reactflow'
 import { valueLessOperator } from './utils'
 import VarSelectInput from '../_base/components/variable/VarSelectInput'
@@ -28,7 +29,9 @@ const Panel: FC<NodeProps<IfElseNodeType>> = ({
   const { nodesReadOnly: readOnly } = useNodesReadOnly()
   // const updateNodeInternals = useUpdateNodeInternals()
 
-  const nodeVars = useBeforeNodeVars({ nodeId: id })
+  const {getBeforeNodeVars} = useWorkflowVariables()
+  const nodeVars = useMemo(() => getBeforeNodeVars(id), [getBeforeNodeVars, id])
+  // const nodeVars = useBeforeNodeVars({ nodeId: id })
 
   const handleSort = useCallback((sortedCases: (CaseItem & { id: string })[]) => {
     const newData = produce(data, (draft) => {

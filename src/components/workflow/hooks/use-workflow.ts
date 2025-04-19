@@ -181,10 +181,21 @@ export const useWorkflow = () => {
 
     return !hasCycle(targetNode)
   }, [store])
+
+  const getIterationNodeChildren = useCallback((nodeId: string) => {
+    const {
+      getNodes,
+    } = store.getState()
+    const nodes = getNodes()
+
+    return nodes.filter(node => node.parentId === nodeId)
+  }, [store])
+
   return {
     getBeforeNodesInSameBranch,
     getAfterNodesInSameBranch,
     isValidConnection,
+    getIterationNodeChildren
   }
 }
 
@@ -277,12 +288,23 @@ export const useWorkflowDraftInit = () => {
   return initData
 }
   
-export const useNodeInfo = (nodeId: string) => {
+// export const useNodeInfo = (nodeId: string) => {
+//   const store = useStoreApi()
+//   const {
+//     getNodes,
+//   } = store.getState()
+//   const allNodes = getNodes()
+//   const node = allNodes.find(n => n.id === nodeId)
+//   return node
+// }
+
+export const useGetNode = () => {
   const store = useStoreApi()
   const {
     getNodes,
   } = store.getState()
-  const allNodes = getNodes()
-  const node = allNodes.find(n => n.id === nodeId)
-  return node
+  return (nodeId: string) => {
+    const allNodes = getNodes()
+    return allNodes.find(n => n.id === nodeId)
+  }
 }

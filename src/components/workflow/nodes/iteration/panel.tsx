@@ -10,16 +10,18 @@ import IterationResultPanel from '../../run/iteration-result-panel'
 import { MAX_ITERATION_PARALLEL_NUM, MIN_ITERATION_PARALLEL_NUM } from '../../constants'
 import type { IterationNodeType } from './types'
 import useConfig from './use-config'
-import { ErrorHandleMode, InputVarType, type NodePanelProps } from '@/components/workflow/types'
+import { ErrorHandleMode, InputVarType, NodeProps, VarType } from '@/components/workflow/types'
 import Field from '@/components/workflow/nodes/_base/components/field'
 import BeforeRunForm from '@/components/workflow/nodes/_base/components/before-run-form'
 import Switch from '@/components/base/switch'
 import Select from '@/components/base/select'
 import Slider from '@/components/base/slider'
 import Input from '@/components/base/input'
+import VarSelect from '../_base/components/variable/VarSelect'
+import ChildVarSelect from './ChildVarSelect'
 
 
-const Panel: FC<NodePanelProps<IterationNodeType>> = ({
+const Panel: FC<NodeProps<IterationNodeType>> = ({
   id,
   data,
 }) => {
@@ -71,30 +73,35 @@ const Panel: FC<NodePanelProps<IterationNodeType>> = ({
     <div className='pt-2 pb-2'>
       <div className='px-4 pb-4 space-y-4'>
         <Field
-          title={t(`${i18nPrefix}.input`)}
+          title='输入'
           operations={(
             <div className='flex items-center h-[18px] px-1 border border-black/8 rounded-[5px] text-xs font-medium text-gray-500 capitalize'>Array</div>
           )}
         >
-          <VarReferencePicker
+          {/* 筛array */}
+          <VarSelect nodeId={id} value={data.iterator_selector} onChange={} varFilter={(v, o) => isArrayType(v.type)}/>
+          {/* <VarReferencePicker
             readonly={readOnly}
             nodeId={id}
             isShowNodeName
             value={inputs.iterator_selector || []}
             onChange={handleInputChange}
             filterVar={filterInputVar}
-          />
+          /> */}
         </Field>
       </div>
       <Split />
       <div className='mt-2 px-4 pb-4 space-y-4'>
         <Field
-          title={t(`${i18nPrefix}.output`)}
+          title='输出变量'
           operations={(
             <div className='flex items-center h-[18px] px-1 border border-black/8 rounded-[5px] text-xs font-medium text-gray-500 capitalize'>Array</div>
           )}
         >
-          <VarReferencePicker
+          {/* todo */}
+          <ChildVarSelect nodeId={id} />
+
+          {/* <VarReferencePicker
             readonly={readOnly}
             nodeId={id}
             isShowNodeName
@@ -102,7 +109,7 @@ const Panel: FC<NodePanelProps<IterationNodeType>> = ({
             onChange={handleOutputVarChange}
             availableNodes={iterationChildrenNodes}
             availableVars={childrenNodeVars}
-          />
+          /> */}
         </Field>
       </div>
       <div className='px-4 pb-2'>
@@ -187,3 +194,8 @@ const Panel: FC<NodePanelProps<IterationNodeType>> = ({
 }
 
 export default React.memo(Panel)
+
+
+const isArrayType = (type: VarType) => {
+  return type === VarType.arrayBoolean || type === VarType.arrayNumber || type === VarType.arrayObject || type === VarType.arrayString
+}

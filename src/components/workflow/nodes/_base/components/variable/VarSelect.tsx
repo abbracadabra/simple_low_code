@@ -2,7 +2,7 @@
 // value: selector
 
 import { useBeforeNodeVars } from "@/components/workflow/hooks"
-import { ValueSelector, VarType } from "@/components/workflow/types"
+import { NodeOutputVar, SimpleVarSchema, ValueSelector, VarType } from "@/components/workflow/types"
 import { Select } from "antd"
 import { useMemo } from "react"
 import { useMergedState } from 'rc-util';
@@ -14,11 +14,13 @@ type VarSelectProps = {
     value?: ValueSelector
     onChange?: (val: ValueSelector) => void
 
+    varFilter?: (v: SimpleVarSchema, o: NodeOutputVar) => boolean
+
     [key: string]: any
 }
 
 
-const VarSelect = ({ onChange, type, nodeId, value: val, ...props }: VarSelectProps) => {
+const VarSelect = ({ onChange, type, nodeId, value: val, varFilter, ...props }: VarSelectProps) => {
 
     const [value, setValue] = useMergedState<ValueSelector>(val)
 
@@ -30,14 +32,13 @@ const VarSelect = ({ onChange, type, nodeId, value: val, ...props }: VarSelectPr
     const nodeVars = useBeforeNodeVars({ nodeId })
     const opts = useMemo(() => {
         let nvs = nodeVars
-        // 筛选类型
-        if (type) {
-            nvs = nodeVars
-                .map(item => ({
+        if (type || varFilter) {
+            nvs = nvs.map(item=> {
+                return {
                     ...item,
-                    vars: item.vars.filter(v => v.type === type)
-                }))
-                .filter(item => item.vars.length > 0)
+                    vars: item.vars.filter(v => type ? v.type === type : true).filter(v => varFilter ? varFilter(v, item) : true)
+                }
+            }).filter(item => item.vars.length > 0)
         }
         // 转成antd select的选项
         return nvs.map(item => {
@@ -52,7 +53,11 @@ const VarSelect = ({ onChange, type, nodeId, value: val, ...props }: VarSelectPr
         })
     }, [nodeVars, type])
 
-    return <Select options={opts} onChange={(v) => { handleOnChange(v?.split(".")) }} value={value?.length ? value?.join(".") : undefined} {...props}/>
+    return <Select
+        options={opts}
+        onChange={(v) => { handleOnChange(v?.split(".")) }}
+        value={value?.length ? value?.join(".") : undefined}
+        {...props} />
 }
 
 export default VarSelect

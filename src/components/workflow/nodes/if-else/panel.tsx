@@ -95,12 +95,8 @@ const Panel: FC<NodeProps<IfElseNodeType>> = ({
         animation={150}>
         {
           cases.map((item, index) => {
-            const sel = item.variable_selector
-            const type = nodeVars.find(nv => {
-              nv.nodeId === id
-            }).vars.find(nv => {
-              nv.name === sel.slice(1).join(".")
-            }).type
+            const [first, ...second] = item.variable_selector
+            const type = nodeVars.find(nv => nv.nodeId === first).vars.find(v => v.name === second.join(".")).type
 
             let compareType: VarType
             if (type === VarType.string || type === VarType.arrayString) {

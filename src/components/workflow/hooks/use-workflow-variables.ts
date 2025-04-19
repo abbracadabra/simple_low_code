@@ -30,7 +30,7 @@ import { ChatSysVars, SysVars } from '../constants';
 const findVarBySelector = ({
   selector,
   nodeOutputs,
-  startId,
+  // startId,
 }: {
   selector: ValueSelector;
   nodeOutputs: NodeOutputVar[];
@@ -59,70 +59,70 @@ const findVarBySelector = ({
 /**
  * 原toNodeOutputVars，节点们的输出变量，iter时也仅是输出变量，没item
  */
-const mapToOutputVars = ({
-  // parentNode,
-  nodes,
-  isChatMode,
-  environmentVariables = [],
-  conversationVariables = [],
-}: {
-  nodes?: Node[];
-  isChatMode: boolean;
-  environmentVariables: VarWithConstVal[];
-  conversationVariables: VarWithConstVal[];
-}): NodeOutputVar[] => {
-  const res: NodeOutputVar[] = [];
-  // 节点的输出变量
-  nodes?.forEach((node) => {
-    let vars: NodeOutputVar['vars'] = [];
-    const getOutputVars = NODES_EXTRA_INFO[node.data.type]?.getOutputVars;
-    // const dataProcessor = NodeFuncMap[node.data.type];
-    vars = [...vars, ...(getOutputVars?.(node.data) || [])];
-    res.push({
-      nodeId: node.id,
-      title: node.data.title,
-      vars,
-    });
-  });
+// const mapToOutputVars = ({
+//   // parentNode,
+//   nodes,
+//   isChatMode,
+//   environmentVariables = [],
+//   conversationVariables = [],
+// }: {
+//   nodes?: Node[];
+//   isChatMode: boolean;
+//   environmentVariables: VarWithConstVal[];
+//   conversationVariables: VarWithConstVal[];
+// }): NodeOutputVar[] => {
+//   const res: NodeOutputVar[] = [];
+//   // 节点的输出变量
+//   nodes?.forEach((node) => {
+//     let vars: NodeOutputVar['vars'] = [];
+//     const getOutputVars = NODES_EXTRA_INFO[node.data.type]?.getOutputVars;
+//     // const dataProcessor = NodeFuncMap[node.data.type];
+//     vars = [...vars, ...(getOutputVars?.(node.data) || [])];
+//     res.push({
+//       nodeId: node.id,
+//       title: node.data.title,
+//       vars,
+//     });
+//   });
 
-  if (isChatMode) {
-    res.push({
-      nodeId: 'sys',
-      title: '系统',
-      vars: [...ChatSysVars],
-    })
-  } else {
-    res.push({
-      nodeId: 'sys',
-      title: '系统',
-      vars: [...SysVars],
-    })
-  }
+//   if (isChatMode) {
+//     res.push({
+//       nodeId: 'sys',
+//       title: '系统',
+//       vars: [...ChatSysVars],
+//     })
+//   } else {
+//     res.push({
+//       nodeId: 'sys',
+//       title: '系统',
+//       vars: [...SysVars],
+//     })
+//   }
 
-  //环境变量
-  if (environmentVariables.length) {
-    res.push({
-      nodeId: 'env',
-      title: 'env',
-      vars: environmentVariables.map((v) => ({
-        name: v.name,
-        type: v.value_type as unknown as VarType,
-      })),
-    });
-  }
-  //会话变量
-  if (conversationVariables.length) {
-    res.push({
-      nodeId: 'chat',
-      title: 'chat',
-      vars: conversationVariables.map((v) => ({
-        name: v.name,
-        type: v.value_type as unknown as VarType,
-      })),
-    });
-  }
-  return res;
-};
+//   //环境变量
+//   if (environmentVariables.length) {
+//     res.push({
+//       nodeId: 'env',
+//       title: 'env',
+//       vars: environmentVariables.map((v) => ({
+//         name: v.name,
+//         type: v.value_type as unknown as VarType,
+//       })),
+//     });
+//   }
+//   //会话变量
+//   if (conversationVariables.length) {
+//     res.push({
+//       nodeId: 'chat',
+//       title: 'chat',
+//       vars: conversationVariables.map((v) => ({
+//         name: v.name,
+//         type: v.value_type as unknown as VarType,
+//       })),
+//     });
+//   }
+//   return res;
+// };
 
 /**
  * node渲染、panel渲染时会用
@@ -142,31 +142,70 @@ export const useWorkflowVariables = () => {
     ({
       nodes,
       parentNode,
-      hideEnv,
-      hideChat,
+      // hideEnv,
+      // hideChat,
     }: {
       parentNode?: Node | null;
       nodes?: Node[];
       hideEnv?: boolean;
       hideChat?: boolean;
     }) => {
-      // output vars
-      const outputVars = mapToOutputVars({
-        nodes: nodes,
-        isChatMode,
-        environmentVariables: hideEnv ? [] : environmentVariables,
-        conversationVariables: hideChat ? [] : conversationVariables,
+      const outputVars: NodeOutputVar[] = [];
+      // 节点的输出变量
+      nodes?.forEach((node) => {
+        let vars: NodeOutputVar['vars'] = [];
+        const getOutputVars = NODES_EXTRA_INFO[node.data.type]?.getOutputVars; // getOutputVars里拿不到react context
+        // const dataProcessor = NodeFuncMap[node.data.type];
+        vars = [...vars, ...(getOutputVars?.(node.data) || [])];
+        outputVars.push({
+          nodeId: node.id,
+          title: node.data.title,
+          vars,
+        });
       });
+
+      //环境变量
+      if (environmentVariables.length) {
+        outputVars.push({
+          nodeId: 'env',
+          title: '环境变量',
+          vars: environmentVariables.map((v) => ({
+            name: v.name,
+            type: v.value_type as unknown as VarType,
+          })),
+        });
+      }
+      //会话变量
+      if (conversationVariables.length) {
+        outputVars.push({
+          nodeId: 'conv',
+          title: '会话变量',
+          vars: conversationVariables.map((v) => ({
+            name: v.name,
+            type: v.value_type as unknown as VarType,
+          })),
+        });
+      }
+
+      if (isChatMode) {
+        outputVars.push({
+          nodeId: 'sys',
+          title: '系统',
+          vars: [...ChatSysVars],
+        })
+      } else {
+        outputVars.push({
+          nodeId: 'sys',
+          title: '系统',
+          vars: [...SysVars],
+        })
+      }
+
       // iter inner var
       if (parentNode) {
-        const startId = nodes?.find((node) => {
-          return node.data.type === BlockEnum.IterationStart;
-        })?.id;
-
         const filtered = findVarBySelector({
           selector: (parentNode.data as IterationNodeType).iterator_selector,
           nodeOutputs: outputVars,
-          startId,
         });
         if (filtered) {
           let eleType: VarType;
@@ -207,37 +246,7 @@ export const useWorkflowVariables = () => {
     },
     [conversationVariables, environmentVariables, isChatMode, allTools],
   );
-
-  const findVarTypeBySelector = useCallback(
-    ({
-      selector,
-      nodes,
-      parentNode,
-      hideEnv,
-      hideChat,
-    }: {
-      selector: ValueSelector;
-      nodes?: Node[];
-      parentNode?: Node;
-      hideEnv?: boolean;
-      hideChat?: boolean;
-    }) => {
-      const accessibleVars: NodeOutputVar[] = getNodeVars({
-        nodes,
-        parentNode,
-        hideEnv,
-        hideChat,
-      });
-      const startId = nodes?.find((node) => {
-        return node.data.type === BlockEnum.IterationStart;
-      })?.id;
-      const filtered = findVarBySelector({ selector, nodeOutputs: accessibleVars, startId });
-      return filtered?.type;
-    },
-    [getNodeVars],
-  );
-
-  return { getNodeVars, findVarTypeBySelector };
+  return { getNodeVars };
 };
 
 export const useBeforeNodeVars = (props: { nodeId: string }) => {
@@ -256,4 +265,42 @@ export const useBeforeNodeVars = (props: { nodeId: string }) => {
   }, [getNodeVars, beforeNodes, nodeId]);
 };
 
+
 // todo node 渲染，如何在引用变量变化后 刷新下
+
+
+
+
+
+
+
+  // const findVarTypeBySelector = useCallback(
+  //   ({
+  //     selector,
+  //     nodes,
+  //     parentNode,
+  //     hideEnv,
+  //     hideChat,
+  //   }: {
+  //     selector: ValueSelector;
+  //     nodes?: Node[];
+  //     parentNode?: Node;
+  //     hideEnv?: boolean;
+  //     hideChat?: boolean;
+  //   }) => {
+  //     const accessibleVars: NodeOutputVar[] = getNodeVars({
+  //       nodes,
+  //       parentNode,
+  //       hideEnv,
+  //       hideChat,
+  //     });
+  //     const startId = nodes?.find((node) => {
+  //       return node.data.type === BlockEnum.IterationStart;
+  //     })?.id;
+  //     const filtered = findVarBySelector({ selector, nodeOutputs: accessibleVars, startId });
+  //     return filtered?.type;
+  //   },
+  //   [getNodeVars],
+  // );
+
+  // return { getNodeVars, findVarTypeBySelector };

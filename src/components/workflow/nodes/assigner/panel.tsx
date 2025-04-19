@@ -1,14 +1,14 @@
 import type { FC } from 'react'
-import React, { useCallback } from 'react'
+import React, { useCallback, useContext } from 'react'
 import { WriteMode, type AssignerNodeType } from './types'
 import { NodeProps, ValueSelector } from '../../types'
 import { DeleteOutlined, PlusOutlined } from '@ant-design/icons'
 import { Col, Row, Select } from 'antd'
 import VarSelect from '../_base/components/variable/VarSelect'
-import { useNodeDataUpdate, useWorkflowVariables } from '../../hooks'
+import { useNodeDataUpdate } from '../../hooks'
 import produce from 'immer'
-import VarSelectInput from '../_base/components/variable/VarSelectInput'
-import VarInput from '../_base/components/variable/VarInput'
+import { useStore } from 'zustand';
+import { WorkflowDraftStoreContext } from '../../context'
 
 const Panel: FC<NodeProps<AssignerNodeType>> = ({
   id,
@@ -48,7 +48,19 @@ const Panel: FC<NodeProps<AssignerNodeType>> = ({
     })
   }, [data, handleNodeDataUpdateWithSyncDraft])
 
-  const { findVarTypeBySelector } = useWorkflowVariables()
+  const handleSetOperator = useCallback((value: WriteMode, index: number) => {
+    const newData = produce(data, (draft) => {
+      draft.items[index].operation = value
+      draft.items[index].value = undefined
+    })
+    handleNodeDataUpdateWithSyncDraft({
+      id,
+      data: newData,
+    })
+  }, [data, handleNodeDataUpdateWithSyncDraft])
+
+  const store = useContext(WorkflowDraftStoreContext)!;
+  const convVars = useStore(store, (s) => s.conversationVariables);
 
   return (
     <div className='flex py-2 flex-col items-start self-stretch'>
@@ -58,17 +70,17 @@ const Panel: FC<NodeProps<AssignerNodeType>> = ({
           <PlusOutlined onClick={handleAddOperation} />
         </div>
         {data.items.map((item, index) => {
-
-// findVarTypeBySelector({selector:item.varToBeAssigned,})
-          // item.varToBeAssigned
+          const [first, ...second] = item.varToBeAssigned
+          const targetType = convVars.find(v => v.name === second.join('.')).value_type
           return <div>
             <Row>
-              <Col span={18}><VarSelect nodeId={id} value={item.varToBeAssigned} onChange={(v) => handleTargetVar(v, index)} /></Col>
-              <Col span={4}><Select value={item.operation} options={Object.values(WriteMode).map((v) => ({ label: v, value: v }))} onChange={  }></Select></Col>
+              {/* 限定选择环境变量 */}
+              <Col span={18}><VarSelect nodeId={id} value={item.varToBeAssigned} onChange={(v) => handleTargetVar(v, index)} varFilter={(v, o) => o.nodeId === 'conv'} /></Col>
+              <Col span={4}><Select value={item.operation} options={Object.values(WriteMode).map((v) => ({ label: v, value: v }))} onChange={v => handleSetOperator(v, index)}></Select></Col>
               <Col span={2}><DeleteOutlined onClick={() => handleRemove(index)} /></Col>
             </Row>
             {item.operation !== WriteMode.clear && <Row>
-              <Col span={18}><VarSelect nodeId={id} value={item.value} type={item.}  /></Col>
+              <Col span={18}><VarSelect nodeId={id} value={item.value} type={targetType} /></Col>
             </Row>}
           </div>
         })}

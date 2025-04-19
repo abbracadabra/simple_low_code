@@ -13,6 +13,7 @@ import CodePanel from '@/components/workflow/nodes/code/panel'
 import ToolPanel from '@/components/workflow/nodes/tool/panel'
 import VariableAggregatorPanel from '@/components/workflow/nodes/variable-aggregator/panel'
 import AssignerPanel from '@/components/workflow/nodes/assigner/panel'
+import IterationPanel from '@/components/workflow/nodes/iteration/panel'
 
 export const PanelComponentMap: Record<string, ComponentType<any>> = {
     [BlockEnum.Start]: StartPanel,
@@ -24,7 +25,7 @@ export const PanelComponentMap: Record<string, ComponentType<any>> = {
     [BlockEnum.Tool]: ToolPanel,
     [BlockEnum.VariableAggregator]: VariableAggregatorPanel,
     [BlockEnum.Assigner]: AssignerPanel,
-
+    [BlockEnum.Iteration]: IterationPanel,
 }
 
 

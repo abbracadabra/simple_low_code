@@ -14,12 +14,13 @@ import ToolPanel from '@/components/workflow/nodes/tool/panel'
 import VariableAggregatorPanel from '@/components/workflow/nodes/variable-aggregator/panel'
 import AssignerPanel from '@/components/workflow/nodes/assigner/panel'
 import IterationPanel from '@/components/workflow/nodes/iteration/panel'
+import LLMPanel from '@/components/workflow/nodes/llm/panel'
 
 export const PanelComponentMap: Record<string, ComponentType<any>> = {
     [BlockEnum.Start]: StartPanel,
     [BlockEnum.End]: EndPanel,
     [BlockEnum.Answer]: AnswerPanel,
-    // [BlockEnum.LLM]: LLMPanel,
+    [BlockEnum.LLM]: LLMPanel,
     [BlockEnum.IfElse]: IfElsePanel,
     [BlockEnum.Code]: CodePanel,
     [BlockEnum.Tool]: ToolPanel,

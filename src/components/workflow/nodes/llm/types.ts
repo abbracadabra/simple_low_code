@@ -3,7 +3,7 @@ import type { CommonNodeData, Memory, ModelConfig, PromptItem, ValueSelector } f
 // fixed prompt + chat history + user prompt
 export type LLMNodeType = CommonNodeData & {
   model: ModelConfig
-  prompt_template: PromptItem[] // setting, few shot
+  fixed_template: PromptItem[] // setting, few shot
   // prompt_config?: {
   //   jinja2_variables?: Variable[]
   // }

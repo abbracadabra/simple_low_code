@@ -13,7 +13,7 @@ import Field from '@/components/workflow/nodes/_base/components/field'
 import Split from '@/components/workflow/nodes/_base/components/split'
 import ModelParameterModal from '@/components/header/account-setting/model-provider-page/model-parameter-modal'
 import OutputVars, { VarItem } from '@/components/workflow/nodes/_base/components/output-vars'
-import { InputVarType, type NodePanelProps } from '@/components/workflow/types'
+import { InputVarType, NodeProps } from '@/components/workflow/types'
 import BeforeRunForm from '@/components/workflow/nodes/_base/components/before-run-form'
 import type { Props as FormProps } from '@/components/workflow/nodes/_base/components/before-run-form/form'
 import ResultPanel from '@/components/workflow/run/result-panel'
@@ -23,11 +23,10 @@ import { useRetryDetailShowInSingleRun } from '@/components/workflow/nodes/_base
 
 
 // handle需要自定义，不在base里，因为要agent tools连接点
-const Panel: FC<NodePanelProps<LLMNodeType>> = ({
+const Panel: FC<NodeProps<LLMNodeType>> = ({
   id,
   data,
 }) => {
-  const { t } = useTranslation()
 
   const {
     readOnly,

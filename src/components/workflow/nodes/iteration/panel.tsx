@@ -1,5 +1,5 @@
 import type { FC } from 'react'
-import React from 'react'
+import React, { useCallback } from 'react'
 import type { IterationNodeType } from './types'
 import { NodeProps, ValueSelector, VarType } from '@/components/workflow/types'
 import VarSelect from '../_base/components/variable/VarSelect'
@@ -20,55 +20,58 @@ const Panel: FC<NodeProps<IterationNodeType>> = ({
 
   const { handleNodeDataUpdateWithSyncDraft } = useNodeDataUpdate()
 
-  const handleSetInput = (value: ValueSelector) => {
+  const handleSetInput = useCallback((value: ValueSelector) => {
     const newData = {
       ...data,
       iterator_selector: value,
     }
     handleNodeDataUpdateWithSyncDraft({ id, data: newData })
-  }
-  const handleSetOutput = (value: ValueSelector, type: VarType) => {
+  }, [data, handleNodeDataUpdateWithSyncDraft])
+
+  const handleSetOutput = useCallback((value: ValueSelector, type: VarType) => {
     const newData = {
       ...data,
       output_selector: value,
       output_type: arrayTypeMapping[type],
     }
     handleNodeDataUpdateWithSyncDraft({ id, data: newData })
-  }
-  const handleIsParallel = (value: boolean) => {
+  }, [data, handleNodeDataUpdateWithSyncDraft])
+
+  const handleIsParallel = useCallback((value: boolean) => {
     const newData = {
       ...data,
       is_parallel: value,
     }
     handleNodeDataUpdateWithSyncDraft({ id, data: newData })
-  }
-  const handleParallelNum = (value: number) => {
+  }, [data, handleNodeDataUpdateWithSyncDraft])
+
+  const handleParallelNum = useCallback((value: number) => {
     const newData = {
       ...data,
       parallel_nums: value,
     }
     handleNodeDataUpdateWithSyncDraft({ id, data: newData })
-  }
+  }, [data, handleNodeDataUpdateWithSyncDraft])
 
   return (
     <div className='pt-2 pb-2'>
       <Flex style={{ width: '100%' }} justify='space-between' align='center'>
-      <div>输入</div>
-      <Tag>Array</Tag>  
+        <div>输入</div>
+        <Tag>Array</Tag>
       </Flex>
-      <VarSelect nodeId={id} value={data.iterator_selector} onChange={handleSetInput} varFilter={(v, o) => isArrayType(v.type)}/>
-      <Divider/>
+      <VarSelect nodeId={id} value={data.iterator_selector} onChange={handleSetInput} varFilter={(v, o) => isArrayType(v.type)} />
+      <Divider />
 
       <Flex style={{ width: '100%' }} justify='space-between' align='center'>
-      <div>输出变量</div>
-      <Tag>Array</Tag>  
+        <div>输出变量</div>
+        <Tag>Array</Tag>
       </Flex>
-      <ChildVarSelect nodeId={id} value={data.output_selector} onChange={handleSetOutput}/>
-      <Divider/>
+      <ChildVarSelect nodeId={id} value={data.output_selector} onChange={handleSetOutput} />
+      <Divider />
 
       <Flex style={{ width: '100%' }} justify='space-between' align='center'>
-      <Tooltip title="在并行模式下，迭代中的任务支持并行执行。"><div>并行模式<QuestionCircleOutlined /></div></Tooltip>
-      <Switch value={data.is_parallel} onChange={handleIsParallel} />
+        <Tooltip title="在并行模式下，迭代中的任务支持并行执行。"><div>并行模式<QuestionCircleOutlined /></div></Tooltip>
+        <Switch value={data.is_parallel} onChange={handleIsParallel} />
       </Flex>
       最大并行度 <InputNumber min={1} max={10} value={data.parallel_nums} onChange={handleParallelNum} />
     </div>

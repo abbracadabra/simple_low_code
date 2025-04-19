@@ -27,10 +27,11 @@ const Panel: FC<NodeProps<IterationNodeType>> = ({
     }
     handleNodeDataUpdateWithSyncDraft({ id, data: newData })
   }
-  const handleSetOutput = (value: ValueSelector) => {
+  const handleSetOutput = (value: ValueSelector, type: VarType) => {
     const newData = {
       ...data,
       output_selector: value,
+      output_type: arrayTypeMapping[type],
     }
     handleNodeDataUpdateWithSyncDraft({ id, data: newData })
   }
@@ -76,3 +77,15 @@ const Panel: FC<NodeProps<IterationNodeType>> = ({
 
 export default React.memo(Panel)
 
+
+const arrayTypeMapping = {
+  [VarType.string]: VarType.arrayString,
+  [VarType.number]: VarType.arrayNumber,
+  [VarType.boolean]: VarType.arrayBoolean,
+  [VarType.object]: VarType.arrayObject,
+
+  [VarType.arrayString]: VarType.arrayObject,
+  [VarType.arrayNumber]: VarType.arrayObject,
+  [VarType.arrayBoolean]: VarType.arrayObject,
+  [VarType.arrayObject]: VarType.arrayObject,
+} as Record<VarType, VarType>

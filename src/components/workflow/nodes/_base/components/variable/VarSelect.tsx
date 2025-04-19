@@ -12,7 +12,7 @@ type VarSelectProps = {
     type?: VarType
 
     value?: ValueSelector
-    onChange?: (val: ValueSelector) => void
+    onChange?: (val: ValueSelector, type:VarType) => void
 
     varFilter?: (v: SimpleVarSchema, o: NodeOutputVar) => boolean
 
@@ -32,6 +32,18 @@ const VarSelect = ({ nodeId, type, value, onChange, varFilter, ...props }: VarSe
     // }
 
     const nodeVars = useMemo(() => { return getBeforeNodeVars(nodeId) }, [getBeforeNodeVars, nodeId])
+
+    const handleChange = (v: string) => {
+        const selector = v?.split(".")
+        if (!selector || selector.length < 2) {
+            return
+        }
+        const [first,...second] = selector
+        const s = nodeVars.find(item => item.nodeId === first).vars.find(v => v.name === second.join("."))
+        onChange?.(selector, s.type)
+    }
+
+    
     // const nodeVars = useBeforeNodeVars({ nodeId })
     const opts = useMemo(() => {
         let nvs = nodeVars
@@ -58,7 +70,7 @@ const VarSelect = ({ nodeId, type, value, onChange, varFilter, ...props }: VarSe
 
     return <Select
         options={opts}
-        onChange={(v) => { onChange?.(v?.split(".")) }}
+        onChange={ handleChange }
         value={value?.length ? value.join(".") : undefined}
         {...props} />
 }

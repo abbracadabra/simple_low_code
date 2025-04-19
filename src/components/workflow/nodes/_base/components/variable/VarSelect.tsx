@@ -5,7 +5,7 @@ import { useWorkflowVariables } from "@/components/workflow/hooks"
 import { NodeOutputVar, SimpleVarSchema, ValueSelector, VarType } from "@/components/workflow/types"
 import { Select, Tag } from "antd"
 import { useMemo } from "react"
-import { useMergedState } from 'rc-util';
+// import { useMergedState } from 'rc-util';
 
 type VarSelectProps = {
     nodeId: string
@@ -20,18 +20,18 @@ type VarSelectProps = {
 }
 
 
-const VarSelect = ({ nodeId, type, value: val, onChange, varFilter, ...props }: VarSelectProps) => {
+const VarSelect = ({ nodeId, type, value, onChange, varFilter, ...props }: VarSelectProps) => {
 
-    const [value, setValue] = useMergedState<ValueSelector>(val)
+    // const [value, setValue] = useMergedState<ValueSelector>(val)
 
-    const {getBeforeNodeVars} = useWorkflowVariables()
+    const { getBeforeNodeVars } = useWorkflowVariables()
 
-    const handleOnChange = (v: ValueSelector) => {
-        setValue(v)
-        onChange?.(v)
-    }
+    // const handleOnChange = (v: ValueSelector) => {
+    //     setValue(v)
+    //     onChange?.(v)
+    // }
 
-    const nodeVars = useMemo(()=>{return getBeforeNodeVars(nodeId)},[getBeforeNodeVars,nodeId])
+    const nodeVars = useMemo(() => { return getBeforeNodeVars(nodeId) }, [getBeforeNodeVars, nodeId])
     // const nodeVars = useBeforeNodeVars({ nodeId })
     const opts = useMemo(() => {
         let nvs = nodeVars
@@ -58,8 +58,8 @@ const VarSelect = ({ nodeId, type, value: val, onChange, varFilter, ...props }: 
 
     return <Select
         options={opts}
-        onChange={(v) => { handleOnChange(v?.split(".")) }}
-        value={value?.length ? value?.join(".") : undefined}
+        onChange={(v) => { onChange?.(v?.split(".")) }}
+        value={value?.length ? value.join(".") : undefined}
         {...props} />
 }
 

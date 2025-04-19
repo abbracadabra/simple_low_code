@@ -259,7 +259,7 @@ export const useWorkflowVariables = () => {
   
   const getChildNodeVars = useCallback((nodeId: string) => {
     const childNodes:Node[]  = getIterationNodeChildren(nodeId)
-    getNodeVars({ nodes: childNodes });
+    return getNodeVars({ nodes: childNodes });
   },[getIterationNodeChildren, getNodeVars])
 
   return { getNodeVars, getBeforeNodeVars, getChildNodeVars };

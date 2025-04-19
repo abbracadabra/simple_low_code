@@ -115,7 +115,8 @@ export function getIterationStartNode(iterationId: string): Node {
   
     if (data.type === BlockEnum.Iteration) {
       const newIterationStartNode = getIterationStartNode(newNode.id); // 长得像home房子的固定节点
-      (newNode.data as IterationNodeType).start_node_id = newIterationStartNode.id;
+      newIterationStartNode.parentId = newNode.id; // 迭代里的开始节点设置parent为迭代节点
+      (newNode.data as IterationNodeType).start_node_id = newIterationStartNode.id; // 迭代节点的开始节点id设置为迭代开始节点
       // (newNode.data as IterationNodeType)._children = [newIterationStartNode.id]
       return {
         newNode,

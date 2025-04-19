@@ -60,7 +60,7 @@ export type CommonNodeData<T = {}> = {
   _iterationIndex?: number;
   // _inParallelHovering?: boolean;
   isInIteration?: boolean;
-  iteration_id?: string;
+  // iteration_id?: string;
   selected?: boolean;
   title: string; // 输入node名
   desc: string; // 输入node描述
@@ -79,7 +79,7 @@ export type CommonEdgeType = {
   // _waitingRun?: boolean // 流程测试执行时 & 未到达的edge，加点透明
   _run?: boolean // 流程测试执行时 & 已run的edge，颜色改变   todo 把上面三个废弃，留这个
   isInIteration?: boolean;
-  iteration_id?: string;
+  // iteration_id?: string;
   sourceType: BlockEnum; // 线的起点的节点类型，此处不是reactflow的组件类型，而是custom_node组件的的二级类型
   targetType: BlockEnum; // 线的终点的节点类型，此处不是reactflow的组件类型，而是custom_node组件的的二级类型
 };
@@ -224,6 +224,7 @@ export type NodeOutputVar = {
   nodeId: string
   title: string // is it unique, avoid confusing todo 
   vars?: SimpleVarSchema[]
+  // type: BlockEnum
 }
 
 export type NodeDefault<T=any> = {
@@ -299,9 +300,9 @@ export type WorkflowRunningData = {
 
 
 //选择节点tab里的每个节点
-export type Block = {
-  classification?: string
-  type: BlockEnum
-  title: string
-  // description?: string
-}
+// export type Block = {
+//   classification?: string
+//   type: BlockEnum
+//   title: string
+//   // description?: string
+// }

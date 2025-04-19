@@ -1,201 +1,78 @@
 import type { FC } from 'react'
 import React from 'react'
-import {
-  RiArrowRightSLine,
-} from '@remixicon/react'
-import VarReferencePicker from '../_base/components/variable/var-reference-picker'
-import Split from '../_base/components/split'
-import ResultPanel from '../../run/result-panel'
-import IterationResultPanel from '../../run/iteration-result-panel'
-import { MAX_ITERATION_PARALLEL_NUM, MIN_ITERATION_PARALLEL_NUM } from '../../constants'
 import type { IterationNodeType } from './types'
-import useConfig from './use-config'
-import { ErrorHandleMode, InputVarType, NodeProps, VarType } from '@/components/workflow/types'
-import Field from '@/components/workflow/nodes/_base/components/field'
-import BeforeRunForm from '@/components/workflow/nodes/_base/components/before-run-form'
-import Switch from '@/components/base/switch'
-import Select from '@/components/base/select'
-import Slider from '@/components/base/slider'
-import Input from '@/components/base/input'
+import { NodeProps, ValueSelector, VarType } from '@/components/workflow/types'
 import VarSelect from '../_base/components/variable/VarSelect'
 import ChildVarSelect from './ChildVarSelect'
+import { Divider, Flex, InputNumber, Switch, Tag, Tooltip } from 'antd'
+import { QuestionCircleOutlined } from '@ant-design/icons'
+import { useNodeDataUpdate } from '../../hooks'
 
+
+const isArrayType = (type: VarType) => {
+  return type === VarType.arrayBoolean || type === VarType.arrayNumber || type === VarType.arrayObject || type === VarType.arrayString
+}
 
 const Panel: FC<NodeProps<IterationNodeType>> = ({
   id,
   data,
 }) => {
-  const responseMethod = [
-    {
-      value: ErrorHandleMode.Terminated,
-      name: t(`${i18nPrefix}.ErrorMethod.operationTerminated`),
-    },
-    {
-      value: ErrorHandleMode.ContinueOnError,
-      name: t(`${i18nPrefix}.ErrorMethod.continueOnError`),
-    },
-    {
-      value: ErrorHandleMode.RemoveAbnormalOutput,
-      name: t(`${i18nPrefix}.ErrorMethod.removeAbnormalOutput`),
-    },
-  ]
-  const {
-    readOnly,
-    inputs,
-    filterInputVar,
-    handleInputChange,
-    childrenNodeVars,
-    iterationChildrenNodes,
-    handleOutputVarChange,
-    isShowSingleRun,
-    hideSingleRun,
-    isShowIterationDetail,
-    backToSingleRun,
-    showIterationDetail,
-    hideIterationDetail,
-    runningStatus,
-    handleRun,
-    handleStop,
-    runResult,
-    inputVarValues,
-    setInputVarValues,
-    usedOutVars,
-    iterator,
-    setIterator,
-    iteratorInputKey,
-    iterationRunResult,
-    changeParallel,
-    changeErrorResponseMode,
-    changeParallelNums,
-  } = useConfig(id, data)
+
+  const { handleNodeDataUpdateWithSyncDraft } = useNodeDataUpdate()
+
+  const handleSetInput = (value: ValueSelector) => {
+    const newData = {
+      ...data,
+      iterator_selector: value,
+    }
+    handleNodeDataUpdateWithSyncDraft({ id, data: newData })
+  }
+  const handleSetOutput = (value: ValueSelector) => {
+    const newData = {
+      ...data,
+      output_selector: value,
+    }
+    handleNodeDataUpdateWithSyncDraft({ id, data: newData })
+  }
+  const handleIsParallel = (value: boolean) => {
+    const newData = {
+      ...data,
+      is_parallel: value,
+    }
+    handleNodeDataUpdateWithSyncDraft({ id, data: newData })
+  }
+  const handleParallelNum = (value: number) => {
+    const newData = {
+      ...data,
+      parallel_nums: value,
+    }
+    handleNodeDataUpdateWithSyncDraft({ id, data: newData })
+  }
 
   return (
     <div className='pt-2 pb-2'>
-      <div className='px-4 pb-4 space-y-4'>
-        <Field
-          title='输入'
-          operations={(
-            <div className='flex items-center h-[18px] px-1 border border-black/8 rounded-[5px] text-xs font-medium text-gray-500 capitalize'>Array</div>
-          )}
-        >
-          {/* 筛array */}
-          <VarSelect nodeId={id} value={data.iterator_selector} onChange={} varFilter={(v, o) => isArrayType(v.type)}/>
-          {/* <VarReferencePicker
-            readonly={readOnly}
-            nodeId={id}
-            isShowNodeName
-            value={inputs.iterator_selector || []}
-            onChange={handleInputChange}
-            filterVar={filterInputVar}
-          /> */}
-        </Field>
-      </div>
-      <Split />
-      <div className='mt-2 px-4 pb-4 space-y-4'>
-        <Field
-          title='输出变量'
-          operations={(
-            <div className='flex items-center h-[18px] px-1 border border-black/8 rounded-[5px] text-xs font-medium text-gray-500 capitalize'>Array</div>
-          )}
-        >
-          {/* todo */}
-          <ChildVarSelect nodeId={id} />
+      <Flex style={{ width: '100%' }} justify='space-between' align='center'>
+      <div>输入</div>
+      <Tag>Array</Tag>  
+      </Flex>
+      <VarSelect nodeId={id} value={data.iterator_selector} onChange={handleSetInput} varFilter={(v, o) => isArrayType(v.type)}/>
+      <Divider/>
 
-          {/* <VarReferencePicker
-            readonly={readOnly}
-            nodeId={id}
-            isShowNodeName
-            value={inputs.output_selector || []}
-            onChange={handleOutputVarChange}
-            availableNodes={iterationChildrenNodes}
-            availableVars={childrenNodeVars}
-          /> */}
-        </Field>
-      </div>
-      <div className='px-4 pb-2'>
-        <Field title={t(`${i18nPrefix}.parallelMode`)} tooltip={<div className='w-[230px]'>{t(`${i18nPrefix}.parallelPanelDesc`)}</div>} inline>
-          <Switch defaultValue={inputs.is_parallel} onChange={changeParallel} />
-        </Field>
-      </div>
-      {
-        inputs.is_parallel && (<div className='px-4 pb-2'>
-          <Field title={t(`${i18nPrefix}.MaxParallelismTitle`)} isSubTitle tooltip={<div className='w-[230px]'>{t(`${i18nPrefix}.MaxParallelismDesc`)}</div>}>
-            <div className='flex row'>
-              <Input type='number' wrapperClassName='w-18 mr-4 ' max={MAX_ITERATION_PARALLEL_NUM} min={MIN_ITERATION_PARALLEL_NUM} value={inputs.parallel_nums} onChange={(e) => { changeParallelNums(Number(e.target.value)) }} />
-              <Slider
-                value={inputs.parallel_nums}
-                onChange={changeParallelNums}
-                max={MAX_ITERATION_PARALLEL_NUM}
-                min={MIN_ITERATION_PARALLEL_NUM}
-                className=' flex-shrink-0 flex-1 mt-4'
-              />
-            </div>
+      <Flex style={{ width: '100%' }} justify='space-between' align='center'>
+      <div>输出变量</div>
+      <Tag>Array</Tag>  
+      </Flex>
+      <ChildVarSelect nodeId={id} value={data.output_selector} onChange={handleSetOutput}/>
+      <Divider/>
 
-          </Field>
-        </div>)
-      }
-      <Split />
-
-      <div className='px-4 py-2'>
-        <Field title={t(`${i18nPrefix}.errorResponseMethod`)} >
-          <Select items={responseMethod} defaultValue={inputs.error_handle_mode} onSelect={changeErrorResponseMode} allowSearch={false}>
-          </Select>
-        </Field>
-      </div>
-
-      {isShowSingleRun && (
-        <BeforeRunForm
-          nodeName={inputs.title}
-          onHide={hideSingleRun}
-          forms={[
-            {
-              inputs: [...usedOutVars],
-              values: inputVarValues,
-              onChange: setInputVarValues,
-            },
-            {
-              label: t(`${i18nPrefix}.input`)!,
-              inputs: [{
-                label: '',
-                variable: iteratorInputKey,
-                type: InputVarType.iterator,
-                required: false,
-              }],
-              values: { [iteratorInputKey]: iterator },
-              onChange: keyValue => setIterator((keyValue as any)[iteratorInputKey]),
-            },
-          ]}
-          runningStatus={runningStatus}
-          onRun={handleRun}
-          onStop={handleStop}
-          result={
-            <div className='mt-3'>
-              <div className='px-4'>
-                <div className='flex items-center h-[34px] justify-between px-3 bg-gray-100 border-[0.5px] border-gray-200 rounded-lg cursor-pointer' onClick={showIterationDetail}>
-                  <div className='leading-[18px] text-[13px] font-medium text-gray-700'>{t(`${i18nPrefix}.iteration`, { count: iterationRunResult.length })}</div>
-                  <RiArrowRightSLine className='w-3.5 h-3.5 text-gray-500' />
-                </div>
-                <Split className='mt-3' />
-              </div>
-              <ResultPanel {...runResult} showSteps={false} />
-            </div>
-          }
-        />
-      )}
-      {isShowIterationDetail && (
-        <IterationResultPanel
-          onBack={backToSingleRun}
-          onHide={hideIterationDetail}
-          list={iterationRunResult}
-        />
-      )}
+      <Flex style={{ width: '100%' }} justify='space-between' align='center'>
+      <Tooltip title="在并行模式下，迭代中的任务支持并行执行。"><div>并行模式<QuestionCircleOutlined /></div></Tooltip>
+      <Switch value={data.is_parallel} onChange={handleIsParallel} />
+      </Flex>
+      最大并行度 <InputNumber min={1} max={10} value={data.parallel_nums} onChange={handleParallelNum} />
     </div>
   )
 }
 
 export default React.memo(Panel)
 
-
-const isArrayType = (type: VarType) => {
-  return type === VarType.arrayBoolean || type === VarType.arrayNumber || type === VarType.arrayObject || type === VarType.arrayString
-}

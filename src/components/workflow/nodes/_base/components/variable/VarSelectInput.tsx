@@ -50,7 +50,7 @@ const VarSelectInput = ({ nodeId, value: val, onChange, type, mix }: VarSelectIn
         comp = <VarSelect nodeId={nodeId} type={type} onChange={onChange} value={value as ValueSelector} />
     }
 
-    return <>{comp}<Switch checkedChildren="手输" unCheckedChildren="引用" checked={isManual} onChange={onSwitch} /></>
+    return <>{comp}<Switch checkedChildren="手输" unCheckedChildren="引用" value={isManual} onChange={onSwitch} /></>
 }
 
 export default VarSelectInput

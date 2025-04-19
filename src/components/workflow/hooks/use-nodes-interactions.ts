@@ -613,7 +613,7 @@ export const useNodesInteractions = () => {
           if (prevNode.parentId) {
             // 在迭代里面新建的节点的parentId不为空
             newNode.data.isInIteration = true
-            newNode.data.iteration_id = prevNode.parentId
+            // newNode.data.iteration_id = prevNode.parentId
             newNode.zIndex = ITERATION_CHILDREN_Z_INDEX
           }
     
@@ -629,7 +629,7 @@ export const useNodesInteractions = () => {
               sourceType: prevNode.data.type,
               targetType: newNode.data.type,
               isInIteration: !!prevNode.parentId,
-              iteration_id: prevNode.parentId,
+              // iteration_id: prevNode.parentId,
             //   _connectedNodeIsSelected: true,
             },
             zIndex: prevNode.parentId ? ITERATION_CHILDREN_Z_INDEX : 0,
@@ -678,7 +678,7 @@ export const useNodesInteractions = () => {
           newNode.extent = nextNode.extent
           if (nextNode.parentId) {
             newNode.data.isInIteration = true
-            newNode.data.iteration_id = nextNode.parentId
+            // newNode.data.iteration_id = nextNode.parentId
             newNode.zIndex = ITERATION_CHILDREN_Z_INDEX
           }
     
@@ -987,24 +987,18 @@ export const useNodesInteractions = () => {
           })
           newNode.id = newNode.id + index
           // This new node is movable and can be placed anywhere
-          let newChildren: Node[] = []
+          // let newChildren: Node[] = []
           if (nodeToPaste.data.type === BlockEnum.Iteration) {
-            newIterationStartNode!.parentId = newNode.id; // 迭代里的开始节点设置parent为迭代节点
-            (newNode.data as IterationNodeType).start_node_id = newIterationStartNode!.id //迭代节点的开始节点id设置为迭代开始节点
-  
-            newChildren = handleNodeIterationChildrenCopy(nodeToPaste.id, newNode.id) // 拷贝迭代内的节点，排除了迭代起始节点
+            // edge是不拷贝的
+            const newChildren = handleNodeIterationChildrenCopy(nodeToPaste.id, newNode.id) // 拷贝迭代内的节点，排除了迭代起始节点
             // newChildren.forEach((child) => {
             //   newNode.data._children?.push(child.id) // 迭代节点的copy.children add child copy
             // })
             newChildren.push(newIterationStartNode!) // 起始节点加入到迭代节点的copy
-          }
-  
-          nodesToPaste.push(newNode)
-  
-          if (newChildren.length)
             nodesToPaste.push(...newChildren)
+          }
+          nodesToPaste.push(newNode)
         })
-  
         setNodes([...nodes, ...nodesToPaste]) // 拷贝节点加到流程图
         updateLocalHistory(WorkflowHistoryEvent.NodePaste) // 本地操作历史
         handleSyncWorkflowDraft() // 同步草稿

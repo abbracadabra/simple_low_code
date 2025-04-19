@@ -34,10 +34,14 @@ const nodeDefault: NodeDefault<AssignerNodeType> = {
       if (!errorMessages && !isConversationVar(item.varToBeAssigned)) {
         errorMessages = '您选择的不是会话变量'
       }
-      if (!errorMessages &&  item.operation !== WriteMode.clear) {
-        if (item.value === undefined || item.value === null || item.value === '') {
+      if (!errorMessages && item.operation !== WriteMode.clear) {
+        // if (item.value === undefined || item.value === null || item.value === '') {
+        //   errorMessages = '请填写会话变量的值'
+        // }
+        if (!errorMessages && !item.value?.length) {
           errorMessages = '请填写会话变量的值'
         }
+
         // if (value.operation === WriteMode.set || value.operation === WriteMode.increment
         //   || value.operation === WriteMode.decrement || value.operation === WriteMode.multiply
         //   || value.operation === WriteMode.divide) {

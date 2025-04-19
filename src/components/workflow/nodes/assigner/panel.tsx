@@ -1,61 +1,77 @@
 import type { FC } from 'react'
-import React from 'react'
-import {
-  RiAddLine,
-} from '@remixicon/react'
-import VarList from './components/var-list'
-import useConfig from './use-config'
-import type { AssignerNodeType } from './types'
-import { useHandleAddOperationItem } from './hooks'
-import ActionButton from '@/components/base/action-button'
-import { NodeProps } from '../../types'
+import React, { useCallback } from 'react'
+import { WriteMode, type AssignerNodeType } from './types'
+import { NodeProps, ValueSelector } from '../../types'
+import { DeleteOutlined, PlusOutlined } from '@ant-design/icons'
+import { Col, Row, Select } from 'antd'
+import VarSelect from '../_base/components/variable/VarSelect'
+import { useNodeDataUpdate, useWorkflowVariables } from '../../hooks'
+import produce from 'immer'
+import VarSelectInput from '../_base/components/variable/VarSelectInput'
+import VarInput from '../_base/components/variable/VarInput'
 
 const Panel: FC<NodeProps<AssignerNodeType>> = ({
   id,
   data,
 }) => {
-  const handleAddOperationItem = useHandleAddOperationItem()
-  const {
-    readOnly,
-    inputs,
-    handleOperationListChanges,
-    getAssignedVarType,
-    getToAssignedVarType,
-    writeModeTypesNum,
-    writeModeTypesArr,
-    writeModeTypes,
-    filterAssignedVar,
-    filterToAssignedVar,
-  } = useConfig(id, data)
-  const handleAddOperation = () => {
-    const newList = handleAddOperationItem(inputs.items || [])
-    handleOperationListChanges(newList)
-  }
+  const { handleNodeDataUpdateWithSyncDraft } = useNodeDataUpdate()
+  const handleAddOperation = useCallback(() => {
+    const newItem = {
+      varToBeAssigned: undefined,
+      operation: WriteMode.set,
+      value: undefined,
+    }
+    const newData = produce(data, draft => {
+      draft.items.push(newItem)
+    })
+    handleNodeDataUpdateWithSyncDraft({ id, data: newData })
+  }, [data, handleNodeDataUpdateWithSyncDraft])
+
+  const handleRemove = useCallback((index: number) => {
+    const newList = produce(data, (draft) => {
+      draft.items.splice(index, 1)
+    })
+    handleNodeDataUpdateWithSyncDraft({
+      id,
+      data: newList,
+    })
+  }, [data, handleNodeDataUpdateWithSyncDraft])
+
+  const handleTargetVar = useCallback((value: ValueSelector, index: number) => {
+    const newData = produce(data, (draft) => {
+      draft.items[index].varToBeAssigned = value
+      draft.items[index].value = undefined
+    })
+    handleNodeDataUpdateWithSyncDraft({
+      id,
+      data: newData,
+    })
+  }, [data, handleNodeDataUpdateWithSyncDraft])
+
+  const { findVarTypeBySelector } = useWorkflowVariables()
 
   return (
     <div className='flex py-2 flex-col items-start self-stretch'>
       <div className='flex flex-col justify-center items-start gap-1 px-4 py-2 w-full self-stretch'>
         <div className='flex items-start gap-2 self-stretch'>
-          <div className='flex flex-col justify-center items-start flex-grow text-text-secondary system-sm-semibold-uppercase'>{t(`${i18nPrefix}.variables`)}</div>
-          <ActionButton onClick={handleAddOperation}>
-            <RiAddLine className='w-4 h-4 shrink-0 text-text-tertiary' />
-          </ActionButton>
+          <div className='flex flex-col justify-center items-start flex-grow text-text-secondary system-sm-semibold-uppercase'>变量</div>
+          <PlusOutlined onClick={handleAddOperation} />
         </div>
-        <VarList
-          readonly={readOnly}
-          nodeId={id}
-          list={inputs.items || []}
-          onChange={(newList) => {
-            handleOperationListChanges(newList)
-          }}
-          filterVar={filterAssignedVar}
-          filterToAssignedVar={filterToAssignedVar}
-          getAssignedVarType={getAssignedVarType}
-          writeModeTypes={writeModeTypes}
-          writeModeTypesArr={writeModeTypesArr}
-          writeModeTypesNum={writeModeTypesNum}
-          getToAssignedVarType={getToAssignedVarType}
-        />
+        {data.items.map((item, index) => {
+
+// findVarTypeBySelector({selector:item.varToBeAssigned,})
+          // item.varToBeAssigned
+          return <div>
+            <Row>
+              <Col span={18}><VarSelect nodeId={id} value={item.varToBeAssigned} onChange={(v) => handleTargetVar(v, index)} /></Col>
+              <Col span={4}><Select value={item.operation} options={Object.values(WriteMode).map((v) => ({ label: v, value: v }))} onChange={  }></Select></Col>
+              <Col span={2}><DeleteOutlined onClick={() => handleRemove(index)} /></Col>
+            </Row>
+            {item.operation !== WriteMode.clear && <Row>
+              <Col span={18}><VarSelect nodeId={id} value={item.value} type={item.}  /></Col>
+            </Row>}
+          </div>
+        })}
       </div>
     </div>
   )
